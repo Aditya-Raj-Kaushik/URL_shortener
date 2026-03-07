@@ -1,70 +1,82 @@
 Scalable URL Shortener
 
-A production-inspired URL Shortener system that converts long URLs into compact short links and redirects users with minimal latency.
-This project demonstrates system design principles, microservice architecture, caching strategies, and CI/CD practices used in large-scale systems.
+A high-performance URL Shortener built with a microservice architecture that converts long URLs into short, shareable links and redirects users with minimal latency.
 
-The platform allows users to create shortened URLs, redirect to original links instantly, and track usage analytics such as click counts.
+This project demonstrates real-world backend engineering practices, including caching, scalable system design, event-driven analytics, and DevOps automation.
 
-Project Overview
+The system is designed to simulate production-grade services similar to Bitly or TinyURL, focusing on high read throughput and low latency redirects.
 
-A URL Shortener works by mapping a long URL to a shorter alias that can be shared easily. When a user accesses the shortened URL, the system retrieves the original URL and redirects the user.
+Key Features
 
-Example:
+Generate short URLs from long links
 
+Instant redirection using cached lookups
+
+Click analytics tracking
+
+Redis-based caching for fast reads
+
+Microservice-based backend architecture
+
+Containerized services with Docker
+
+CI/CD pipeline integration
+
+Code quality checks with SonarCloud
+
+Example
 Original URL
-https://www.example.com/articles/how-to-build-a-distributed-system
+https://www.example.com/blog/how-distributed-systems-work
 
-Short URL
+Shortened URL
 https://short.ly/a82c7w
 
-When a user opens the short URL, the service quickly redirects them to the original destination.
+Visiting the shortened URL automatically redirects the user to the original destination.
 
-This project is designed to simulate real-world large-scale systems handling millions of URLs and high read traffic.
+Architecture Overview
 
-Features
-URL Shortening
-
-Users can input a long URL and receive a unique shortened link.
-
-Fast Redirection
-
-Short URLs redirect users to the original link with minimal latency.
-
-Analytics Tracking
-
-Tracks the number of times each shortened URL is accessed.
-
-Caching
-
-Uses an in-memory cache to reduce database load and speed up redirection.
-
-Scalable Architecture
-
-Designed to handle high read traffic with a read-heavy architecture.
-
-DevOps Integration
-
-Includes containerization and CI/CD pipeline setup.
-
-System Architecture
-
-The system follows a microservice-based architecture where different services handle different responsibilities.
+The system is designed with separation of concerns so that different services can scale independently.
 
                 Internet
                    |
                 Nginx
                    |
-            ----------------
-            |              |
-         Next.js        Redirect Service
-        (Frontend)       (Node.js)
-            |                |
-        URL Service        Redis
-          (Node.js)          |
-            |             MongoDB
-            |
-        MongoDB
-Technology Stack
+          ---------------------
+          |                   |
+       Next.js            Redirect Service
+      (Frontend)            (Node.js)
+          |                     |
+      URL Service             Redis
+       (Node.js)                |
+          |                  MongoDB
+       MongoDB
+          |
+     Analytics Worker
+Services
+
+Frontend
+
+User interface for creating short URLs
+
+Dashboard for viewing analytics
+
+URL Service
+
+Generates unique short IDs
+
+Stores URL mappings in the database
+
+Redirect Service
+
+Handles incoming short URL requests
+
+Uses Redis to quickly retrieve original URLs
+
+Analytics Worker
+
+Tracks clicks and usage statistics
+
+Tech Stack
 Frontend
 
 Next.js
@@ -75,172 +87,59 @@ Node.js
 
 Express.js
 
-Database
+Data Layer
 
 MongoDB
 
-Caching
-
 Redis
 
-Reverse Proxy
+Infrastructure
+
+Docker
 
 Nginx
 
 DevOps
 
-Docker
-
 GitLab CI/CD
 
 SonarCloud
 
-How the System Works
-1. URL Creation Flow
+How It Works
+1. URL Shortening
 
-User submits a long URL through the frontend.
+User submits a long URL through the frontend
 
-The request is sent to the URL service.
+The request is sent to the URL Service
 
-A unique ID is generated.
+A unique ID is generated
 
-The ID is encoded using Base62 encoding.
+The ID is encoded using Base62
 
-The short URL mapping is stored in the database.
+The mapping is stored in MongoDB
 
-The shortened URL is returned to the user.
+A short URL is returned
 
-2. URL Redirection Flow
+2. URL Redirection
 
-User opens the short URL.
+User accesses the short URL
 
-The request reaches the redirect service.
+Redirect service checks Redis cache
 
-The service first checks the cache for the original URL.
+If cache hit → redirect immediately
 
-If found, it instantly redirects the user.
+If cache miss → fetch from MongoDB
 
-If not found, the database is queried.
+Cache the result and redirect
 
-The result is cached for future requests.
+This ensures low latency and reduced database load.
 
 3. Analytics Tracking
 
-Every redirect request generates an event that increments the click counter for that URL.
-Analytics data can be used to track link popularity and usage patterns.
+Each redirect event increments a click counter associated with the short URL.
 
-Project Structure
-url-shortener
-│
-├── frontend
-│   ├── pages
-│   ├── components
-│   └── services
-│
-├── url-service
-│   ├── controllers
-│   ├── routes
-│   ├── models
-│   └── utils
-│
-├── redirect-service
-│   ├── controllers
-│   ├── routes
-│   └── cache
-│
-├── analytics-worker
-│
-├── infrastructure
-│   ├── docker
-│   └── nginx
-│
-├── docker-compose.yml
-└── README.md
-API Endpoints
-Create Short URL
-POST /api/urls
+Analytics data can be used to measure:
 
-Request
+total clicks
 
-{
-  "url": "https://example.com"
-}
-
-Response
-
-{
-  "shortUrl": "https://short.ly/a82c7w"
-}
-Redirect URL
-GET /{shortId}
-
-Response
-
-302 Redirect → Original URL
-Get Analytics
-GET /api/analytics/{shortId}
-
-Response
-
-{
-  "clicks": 1520
-}
-Scaling Strategy
-
-To handle high traffic, the system implements several scaling techniques:
-
-Horizontal Scaling
-
-Multiple instances of services can run behind a load balancer.
-
-Caching
-
-Redis reduces database queries for frequently accessed URLs.
-
-Sharding
-
-Data can be distributed across multiple database shards based on URL prefixes.
-
-Asynchronous Analytics
-
-Analytics updates can be processed asynchronously to avoid slowing down redirects.
-
-Future Improvements
-
-Possible enhancements include:
-
-Custom short URLs
-
-URL expiration support
-
-Geo-based analytics
-
-Rate limiting
-
-QR code generation for links
-
-Distributed event streaming for analytics
-
-Global CDN integration
-
-Learning Objectives
-
-This project demonstrates concepts such as:
-
-Distributed system design
-
-Caching strategies
-
-High availability architecture
-
-Microservices
-
-Horizontal scalability
-
-CI/CD pipelines
-
-Backend performance optimization
-
-License
-
-This project is open-source and available for learning and educational purposes.
+popularity of links
